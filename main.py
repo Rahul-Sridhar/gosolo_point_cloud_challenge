@@ -40,6 +40,7 @@ def main():
     points = open_ply("data/PointCloud.ply")
     # Your code goes here
     
+    # cluster all points with same color
     unique_color_to_points = dict()
     for point in points:
         color_combo = str(point[6]) + "," + str(point[7]) + "," + str(point[8])
@@ -48,6 +49,7 @@ def main():
         unique_color_to_points[color_combo].append(point)
         
     
+    # calculate the mean and std for each cluster
     unique_color_to_means = dict()
     unique_color_to_stds = dict()
     for unique_color, color_points in unique_color_to_points.items():
@@ -62,28 +64,30 @@ def main():
         unique_color_to_means[unique_color] = np.array(means)
         unique_color_to_stds[unique_color] = np.array(stds)
         
+    # set outlier points to black color
     for unique_color, color_points in unique_color_to_points.items():
-    means = unique_color_to_means[unique_color]
-    mean_z = means[2]
-    mean_nx = means[3]
-    mean_ny = means[4]
-    mean_nz = means[5]
-    stds = unique_color_to_stds[unique_color]
-    std_z = stds[2]
-    std_nx = stds[3]
-    std_ny = stds[4]
-    std_nz = stds[5]
-    for idx, color_point in enumerate(color_points):
-        color_point_z = color_point[2]
-        color_point_nx = color_point[3]
-        color_point_ny = color_point[4]
-        color_point_nz = color_point[5]
-        if(color_point_z > mean_z + 2 * std_z or color_point_z < mean_z - 2 * std_z or 
-           color_point_nx > mean_nx + 2 * std_nx or color_point_nx < mean_nx - 2 * std_nx or 
-           color_point_ny > mean_ny + 2 * std_ny or color_point_ny < mean_ny - 2 * std_ny or 
-           color_point_nz > mean_nz + 2 * std_nz or color_point_nz < mean_nz - 2 * std_nz):
-            color_points[idx][6] = color_points[idx][7] = color_points[idx][8] = 0.0
+        means = unique_color_to_means[unique_color]
+        mean_z = means[2]
+        mean_nx = means[3]
+        mean_ny = means[4]
+        mean_nz = means[5]
+        stds = unique_color_to_stds[unique_color]
+        std_z = stds[2]
+        std_nx = stds[3]
+        std_ny = stds[4]
+        std_nz = stds[5]
+        for idx, color_point in enumerate(color_points):
+            color_point_z = color_point[2]
+            color_point_nx = color_point[3]
+            color_point_ny = color_point[4]
+            color_point_nz = color_point[5]
+            if(color_point_z > mean_z + 2 * std_z or color_point_z < mean_z - 2 * std_z or 
+               color_point_nx > mean_nx + 2 * std_nx or color_point_nx < mean_nx - 2 * std_nx or 
+               color_point_ny > mean_ny + 2 * std_ny or color_point_ny < mean_ny - 2 * std_ny or 
+               color_point_nz > mean_nz + 2 * std_nz or color_point_nz < mean_nz - 2 * std_nz):
+                color_points[idx][6] = color_points[idx][7] = color_points[idx][8] = 0.0
             
+    # merge all cluster of points
     new_points = []
     for unique_color, color_points in unique_color_to_points.items():
         new_points.append(color_points)
